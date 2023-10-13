@@ -105,7 +105,7 @@ void Ball::Reset()
 	constexpr float initial_speed = 5.0f;
 
 	vx_ = (std::rand() % 2 == 0) ? initial_speed : -initial_speed;
-	vy_ = 0;
+	vy_ = ((static_cast<float>(std::rand()) / RAND_MAX) - 0.5f) * initial_speed;
 }
 
 SDL_FPoint Ball::GetRotatedPoint(const SDL_FPoint& point, const SDL_FPoint& pivot, int degrees)
