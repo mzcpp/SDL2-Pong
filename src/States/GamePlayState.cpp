@@ -182,7 +182,10 @@ void GamePlayState::HandleEvents()
 			game_->PopState();
 		}
 	}
+}
 
+void GamePlayState::Tick()
+{
 	if (game_->game_mode_ == GameMode::SINGLE_PLAYER)
 	{
 		const float paddle_mid_point_y = player2_paddle_.rect_.y + (player2_paddle_.rect_.h / 2.0);
@@ -219,10 +222,7 @@ void GamePlayState::HandleEvents()
 			player2_paddle_.vy_ = 0.0;
 		}
 	}
-}
-
-void GamePlayState::Tick()
-{
+	
 	player1_paddle_.Tick();
 	player2_paddle_.Tick();
 
