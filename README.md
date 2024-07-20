@@ -10,6 +10,6 @@ Multi-Player controls:
   
 Compiled with provided Makefile.
 
-<img src="https://i.imgur.com/gHT46DC.png"/>
-<img src="https://i.imgur.com/KQ9z975.png"/>
-<img src="https://i.imgur.com/BkECOg6.png"/>
+<img src="/img/pong_1.png"/>
+<img src="/img/pong_2.png"/>
+<img src="/img/pong_3.png"/>
