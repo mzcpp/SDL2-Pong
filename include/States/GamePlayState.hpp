@@ -4,8 +4,10 @@
 #include "GameState.hpp"
 #include "Paddle.hpp"
 #include "Ball.hpp"
+#include "Utility.hpp"
 
 #include <memory>
+#include <cmath>
 
 class GamePlayState : public GameState
 {
@@ -24,6 +26,8 @@ private:
 
 	bool ball_resetting_;
 	int ball_reset_ticks_;
+
+	SDL_FPoint intersection_point_;
 
 	void DrawDividerRects();
 
@@ -50,6 +54,8 @@ public:
 	void Tick() override;
 
 	void Render() override;
+
+	const SDL_FPoint GetIntersectionPoint(const Line& line_1, const Line& line_2) const;
 };
 
 #endif

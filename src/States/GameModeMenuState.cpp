@@ -45,6 +45,9 @@ bool GameModeMenuState::Enter(Game* game)
 	
 	multi_player_button_ = std::make_unique<Button>(game_, font_, "Multiplayer");
 	multi_player_button_->SetPosition((constants::screen_width / 2) - (multi_player_button_->GetTexture()->width_ / 2), constants::screen_height * 4 / 7);
+
+	spectator_button_ = std::make_unique<Button>(game_, font_, "Spectator");
+	spectator_button_->SetPosition((constants::screen_width / 2) - (spectator_button_->GetTexture()->width_ / 2), constants::screen_height * 5 / 7);
 	
 	return true;
 }
@@ -63,6 +66,7 @@ void GameModeMenuState::Resume()
 {
 	single_player_button_->UpdateButtonFlags();
 	multi_player_button_->UpdateButtonFlags();
+	spectator_button_->UpdateButtonFlags();
 }
 
 void GameModeMenuState::HandleEvents()
@@ -88,11 +92,17 @@ void GameModeMenuState::HandleEvents()
 				game_->game_mode_ = GameMode::MULTI_PLAYER;
 				game_->PushState(GamePlayState::Instance());
 			}
+			else if (spectator_button_->MouseOverlapsButton())
+			{
+				game_->game_mode_ = GameMode::SPECTATOR;
+				game_->PushState(GamePlayState::Instance());
+			}
 		}
 		else if (e.type == SDL_MOUSEMOTION)
 		{
 			single_player_button_->HandleEvent(&e);
 			multi_player_button_->HandleEvent(&e);
+			spectator_button_->HandleEvent(&e);
 		}
 	}
 }
@@ -101,6 +111,7 @@ void GameModeMenuState::Tick()
 {
 	single_player_button_->Tick();
 	multi_player_button_->Tick();
+	spectator_button_->Tick();
 }
 
 void GameModeMenuState::Render()
@@ -114,6 +125,7 @@ void GameModeMenuState::Render()
 
 	single_player_button_->Render();
 	multi_player_button_->Render();
+	spectator_button_->Render();
 
 	SDL_RenderPresent(game_->renderer_);
 }

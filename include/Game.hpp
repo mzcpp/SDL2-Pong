@@ -14,12 +14,12 @@ class GameState;
 
 enum class GameMode
 {
-	SINGLE_PLAYER, MULTI_PLAYER
+	SINGLE_PLAYER, MULTI_PLAYER, SPECTATOR
 };
 
 enum class GameDifficulty
 {
-	EASY, MEDIUM, HARD
+	EASY, MEDIUM, HARD, IMPOSSIBLE
 };
 
 class Game

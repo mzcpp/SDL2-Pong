@@ -56,6 +56,11 @@ void Ball::Tick()
 	{
 		rect_.y -= vy_;
 		vy_ = -vy_;
+
+		direction_ray_.start_point.x = rect_.x + (rect_.w / 2);
+		direction_ray_.start_point.y = rect_.y + (rect_.h / 2);
+		direction_ray_.end_point.x = rect_.x + (rect_.w / 2) + ((constants::screen_width + constants::screen_height) * vx_);
+		direction_ray_.end_point.y = rect_.y + (rect_.h / 2) + ((constants::screen_width + constants::screen_height) * vy_);
 	}
 }
 
@@ -88,6 +93,11 @@ void Ball::BounceBall(const Paddle& paddle)
 	vx_ = vx_ > 0 ? reflection_vector.x : -reflection_vector.x;
 	vy_ = -reflection_vector.y;
 
+	direction_ray_.start_point.x = rect_.x + (rect_.w / 2);
+	direction_ray_.start_point.y = rect_.y + (rect_.h / 2);
+	direction_ray_.end_point.x = rect_.x + (rect_.w / 2) + ((constants::screen_width + constants::screen_height) * vx_);
+	direction_ray_.end_point.y = rect_.y + (rect_.h / 2) + ((constants::screen_width + constants::screen_height) * vy_);
+
 	vx_ *= speed_multiple;
 	vy_ *= speed_multiple;
 }
@@ -106,6 +116,11 @@ void Ball::Reset()
 
 	vx_ = (std::rand() % 2 == 0) ? initial_speed : -initial_speed;
 	vy_ = ((static_cast<float>(std::rand()) / RAND_MAX) - 0.5f) * initial_speed;
+	
+	direction_ray_.start_point.x = rect_.x + (rect_.w / 2);
+	direction_ray_.start_point.y = rect_.y + (rect_.h / 2);
+	direction_ray_.end_point.x = rect_.x + (rect_.w / 2) + ((constants::screen_width + constants::screen_height) * vx_);
+	direction_ray_.end_point.y = rect_.y + (rect_.h / 2) + ((constants::screen_width + constants::screen_height) * vy_);
 }
 
 SDL_FPoint Ball::GetRotatedPoint(const SDL_FPoint& point, const SDL_FPoint& pivot, int degrees)

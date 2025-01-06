@@ -19,6 +19,7 @@ private:
 	
 	std::unique_ptr<Button> single_player_button_;
 	std::unique_ptr<Button> multi_player_button_;
+	std::unique_ptr<Button> spectator_button_;
 
 public:
 	GameModeMenuState() = default;

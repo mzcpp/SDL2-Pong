@@ -18,6 +18,7 @@ private:
 	std::unique_ptr<Button> easy_difficulty_button_;
 	std::unique_ptr<Button> medium_difficulty_button_;
 	std::unique_ptr<Button> hard_difficulty_button_;
+	std::unique_ptr<Button> impossible_difficulty_button_;
 
 public:
 	GameDifficultyMenuState() = default;
