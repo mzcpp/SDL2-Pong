@@ -2,25 +2,25 @@
 #include <type_traits>
 
 template <typename T, typename std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-bool FloatingPointSame(T a, T b)
+bool FloatingPointSame(T a, T b, T epsilon = std::numeric_limits<T>::epsilon())
 {
-    return std::fabs(a - b) <= ((std::fabs(a) > std::fabs(b) ? std::fabs(b) : std::fabs(a)) * std::numeric_limits<T>::epsilon());
+    return std::fabs(a - b) <= ((std::fabs(a) > std::fabs(b) ? std::fabs(b) : std::fabs(a)) * epsilon);
 }
 
 template <typename T, typename std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-bool FloatingPointGreaterThan(T a, T b)
+bool FloatingPointGreaterThan(T a, T b, T epsilon = std::numeric_limits<T>::epsilon())
 {
-    return (a - b) > (std::fabs(a) < std::fabs(b) ? std::fabs(b) : std::fabs(a)) * std::numeric_limits<T>::epsilon();
+    return (a - b) > (std::fabs(a) < std::fabs(b) ? std::fabs(b) : std::fabs(a)) * epsilon;
 }
 
 template <typename T, typename std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-bool FloatingPointLessThan(T a, T b)
+bool FloatingPointLessThan(T a, T b, T epsilon = std::numeric_limits<T>::epsilon())
 {
-    return (b - a) > ((std::fabs(a) < std::fabs(b) ? std::fabs(b) : std::fabs(a)) * std::numeric_limits<T>::epsilon());
+    return (b - a) > ((std::fabs(a) < std::fabs(b) ? std::fabs(b) : std::fabs(a)) * epsilon);
 }
 
 template <typename T>
-const std::tuple<T, T, T> LinearEquationCoefficients(T x_1, T y_1, T x_2, T y_2)
+const std::tuple<T, T, T> GetLinearEquationCoefficients(T x_1, T y_1, T x_2, T y_2)
 {
     const T A = y_2 - y_1;
     const T B = x_1 - x_2;
