@@ -19,7 +19,7 @@ enum class GameMode
 
 enum class GameDifficulty
 {
-	EASY, MEDIUM, HARD, IMPOSSIBLE
+	EASY, MEDIUM, HARD
 };
 
 class Game

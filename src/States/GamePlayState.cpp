@@ -192,8 +192,7 @@ void GamePlayState::HandleEvents()
 
 		if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
 		{
-			//game_->PopState();
-			pause = !pause;
+			game_->PopState();
 		}
 	}
 }
@@ -244,51 +243,20 @@ void GamePlayState::Tick()
 
 		if (game_->game_difficulty_ == GameDifficulty::EASY)
 		{
-			speed = 5.0f;
+			speed = 5.5f;
 		}
 		else if (game_->game_difficulty_ == GameDifficulty::MEDIUM)
 		{
-			speed = 6.0f;
+			speed = 6.5f;
 		}
-		else if (game_->game_difficulty_ == GameDifficulty::HARD || game_->game_difficulty_ == GameDifficulty::IMPOSSIBLE)
+		else if (game_->game_difficulty_ == GameDifficulty::HARD)
 		{
-			speed = 7.0f;
+			speed = 7.5f;
 		}
-
-		// for (std::size_t i = 0; i < edges.size(); ++i)
-		// {
-		// 	intersection_point_ = GetIntersectionPoint(edges[i], ball_.direction_ray_);
-
-		// 	if (intersection_point_.x != std::numeric_limits<float>::max() && intersection_point_.y != std::numeric_limits<float>::max())
-		// 	{
-		// 		if (game_->game_difficulty_ != GameDifficulty::IMPOSSIBLE)
-		// 		{
-		// 			std::cout << i << '\n';
-		// 			break;
-		// 		}
-		// 		else
-		// 		{
-		// 			// Line reflected_line = ball_.direction_ray_;
-
-		// 			// while (!FloatingPointSame(intersection_point_.x, 0.0f) || !FloatingPointSame(intersection_point_.x, static_cast<float>(constants::screen_width)))
-		// 			// {
-		// 			// 	reflected_line.start_point = intersection_point_;
-		// 			// 	reflected_line.end_point = intersection_point_;
-
-		// 			// 	SDL_FPoint reflected_vector = { ball_.vx_, -ball_.vy_ };
-
-		// 			// 	reflected_line.end_point.x = reflected_line.end_point.x + ((constants::screen_width + constants::screen_height) * reflected_vector.x);
-		// 			// 	reflected_line.end_point.y = reflected_line.end_point.y + ((constants::screen_width + constants::screen_height) * reflected_vector.y);
-		// 			// }
-		// 		}
-		// 	}
-		// }
 
 		const float paddle_mid_point_y = player2_paddle_.rect_.y + (player2_paddle_.rect_.h / 2.0);
 		const float dist = intersection_point_.y - paddle_mid_point_y;
 
-
-		// fix stutter back and forth
 		if (!FloatingPointSame(paddle_mid_point_y, intersection_point_.y, 0.05f))
 		{
 			if (dist < 0.0f)
@@ -329,95 +297,6 @@ void GamePlayState::Render()
 
 	player1_score_texture_->Render(game_->renderer_, constants::screen_width - score_x_offset, score_y_pos);
 	player2_score_texture_->Render(game_->renderer_, score_x_offset - player2_score_texture_->width_, score_y_pos);
-	
-	SDL_RenderDrawLineF(game_->renderer_, ball_.direction_ray_.start_point.x, ball_.direction_ray_.start_point.y, ball_.direction_ray_.end_point.x, ball_.direction_ray_.end_point.y);
-
-						std::vector<SDL_FPoint> ints;
-						
-						constexpr float epsilon = 0.1f;
-						
-						SDL_FPoint intersect_copy = intersection_point_;						
-						Line reflected_line = ball_.direction_ray_;
-						SDL_FPoint reflected_vector = { intersection_point_.x - reflected_line.start_point.x, intersection_point_.y - reflected_line.start_point.y };
-						int count = 0;
-						ints.push_back(intersect_copy);
-
-
-						while (!FloatingPointSame(intersect_copy.x, 0.0f, epsilon) && !FloatingPointSame(intersect_copy.x, static_cast<float>(constants::screen_width), epsilon))
-						{
-							++count;
-							
-
-							reflected_line.start_point = intersect_copy;
-							reflected_line.end_point = intersect_copy;
-
-							reflected_vector.y = -reflected_vector.y;
-
-							constexpr float multiplier = 0.005f;
-
-							reflected_line.start_point.x = reflected_line.start_point.x + (multiplier * reflected_vector.x);
-							reflected_line.start_point.y = reflected_line.start_point.y + (multiplier * reflected_vector.y);
-							reflected_line.end_point.x = reflected_line.end_point.x + ((constants::screen_width + constants::screen_height) * reflected_vector.x);
-							reflected_line.end_point.y = reflected_line.end_point.y + ((constants::screen_width + constants::screen_height) * reflected_vector.y);
-
-							SDL_RenderDrawLineF(game_->renderer_, reflected_line.start_point.x, reflected_line.start_point.y, reflected_line.end_point.x, reflected_line.end_point.y);
-
-							bool found = false;
-							
-							for (std::size_t i = 0; i < edges.size(); ++i)
-							{
-								SDL_FPoint intersect = GetLinesIntersectionPoint(edges[i], reflected_line);
-								
-								if (intersect.x != std::numeric_limits<float>::max() && intersect.y != std::numeric_limits<float>::max())
-								{
-									intersect_copy = intersect;
-									found = true;
-									ints.push_back(intersect_copy);
-									SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0x00, 0x00, 0xff);
-									constexpr float box_size = 30.0f;
-									SDL_FRect collision_box = { intersect_copy.x - (box_size / 2), intersect_copy.y - (box_size / 2), box_size, box_size };
-									SDL_RenderFillRectF(game_->renderer_, &collision_box);
-									SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0xff, 0xff, 0xff);
-									// std::cout << std::setprecision(10);
-									// std::cout << intersect_copy.x << ' ' << intersect_copy.y << '\n';
-
-									break;
-								}
-							}
-
-							if (count > 10)
-							{
-								std::cout << ints.size() << '\n';
-								
-								for (SDL_FPoint point : ints)
-								{
-									std::cout << point.x << ' ' << point.y << '\n';
-								}
-							 	
-								std::cout << "BREAK\n";
-								break;
-							}
-
-							if (!found)
-							{
-								std::cout << "DID NOT FIND\n";
-								std::cout << reflected_line.start_point.x << ' ' << reflected_line.start_point.y << '\n';
-								std::cout << reflected_line.end_point.x << ' ' << reflected_line.end_point.y << '\n';
-								std::cout << "DID NOT FIND\n";
-								break;
-							}
-						}
-	{
-		SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0x00, 0x00, 0xff);
-
-		constexpr float box_size = 30.0f;
-		SDL_FRect collision_box = { intersection_point_.x - (box_size / 2), intersection_point_.y - (box_size / 2), box_size, box_size };
-		SDL_RenderFillRectF(game_->renderer_, &collision_box);
-		SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0xff, 0xff, 0xff);
-
-		// collision_box = { intersect_copy.x - (box_size / 2), intersect_copy.y - (box_size / 2), box_size, box_size };
-		// SDL_RenderFillRectF(game_->renderer_, &collision_box);
-	}
 	
 	SDL_RenderPresent(game_->renderer_);
 }
@@ -463,27 +342,7 @@ void GamePlayState::GetEdgeIntersectionPoint()
 
 		if (intersection_point_.x != std::numeric_limits<float>::max() && intersection_point_.y != std::numeric_limits<float>::max())
 		{
-			if (game_->game_difficulty_ != GameDifficulty::IMPOSSIBLE)
-			{
-				return;
-			}
-			else
-			{
-				constexpr float epsilon = 0.01f;
-				Line reflected_line = { intersection_point_.x, intersection_point_.y, intersection_point_.x, intersection_point_.y };
-				SDL_FPoint intersect_copy = intersection_point_;
-
-				while (!FloatingPointSame(intersect_copy.x, 0.0f, epsilon) && !FloatingPointSame(intersect_copy.x, static_cast<float>(constants::screen_width), epsilon))
-				{
-
-				}
-
-				intersection_point_ = intersect_copy;
-				
-				// while (intersection point on either of the vertical lines)
-					// reflect ray from intersection point
-					// get another intersection point
-			}
+			return;
 		}
 	}
 }
