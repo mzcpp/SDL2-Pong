@@ -1,14 +1,27 @@
 #ifndef GAME_PLAY_STATE_HPP
 #define GAME_PLAY_STATE_HPP
 
+#include "Constants.hpp"
 #include "GameState.hpp"
 #include "Paddle.hpp"
 #include "Ball.hpp"
+#include "Utility.hpp"
 
 #include <memory>
+#include <cmath>
+#include <array>
+
+const Line top_edge = { 0.0f, 0.0f, static_cast<float>(constants::screen_width), 0.0f };
+const Line right_edge = { static_cast<float>(constants::screen_width), 0.0f, static_cast<float>(constants::screen_width), static_cast<float>(constants::screen_height) };
+const Line bottom_edge = { static_cast<float>(constants::screen_width), static_cast<float>(constants::screen_height), 0.0f, static_cast<float>(constants::screen_height) };
+const Line left_edge = { 0.0f, static_cast<float>(constants::screen_height), 0.0f, 0.0f };
+
+const std::array<Line, 4> edges = { top_edge, right_edge, bottom_edge, left_edge };
 
 class GamePlayState : public GameState
 {
+	friend class Ball;
+
 private:
 	static std::unique_ptr<GamePlayState> game_play_state_;
 
@@ -24,6 +37,8 @@ private:
 
 	bool ball_resetting_;
 	int ball_reset_ticks_;
+
+	SDL_FPoint intersection_point_;
 
 	void DrawDividerRects();
 
@@ -50,6 +65,12 @@ public:
 	void Tick() override;
 
 	void Render() override;
+
+	const SDL_FPoint GetLinesIntersectionPoint(const Line& line_1, const Line& line_2) const;
+
+	void GetEdgeIntersectionPoint();
+
+	bool IsPointOnLine(const SDL_FPoint point, const Line& line) const;
 };
 
 #endif

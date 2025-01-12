@@ -1,6 +1,8 @@
 #ifndef BALL_HPP
 #define BALL_HPP
 
+#include "Utility.hpp"
+
 #include <SDL2/SDL.h>
 
 class Game;
@@ -11,6 +13,7 @@ class Ball
 public:
 	Game* game_;	
 	SDL_FRect rect_;
+	Line direction_ray_;
 	float vx_;
 	float vy_;
 

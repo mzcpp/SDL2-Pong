@@ -43,7 +43,7 @@ bool GameDifficultyMenuState::Enter(Game* game)
 	
 	hard_difficulty_button_ = std::make_unique<Button>(game_, font_, "Hard");
 	hard_difficulty_button_->SetPosition((constants::screen_width / 2) - (hard_difficulty_button_->GetTexture()->width_ / 2), constants::screen_height * 5 / 8);
-	
+
 	return true;
 }
 

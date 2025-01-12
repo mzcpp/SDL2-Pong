@@ -45,7 +45,7 @@ bool GameModeMenuState::Enter(Game* game)
 	
 	multi_player_button_ = std::make_unique<Button>(game_, font_, "Multiplayer");
 	multi_player_button_->SetPosition((constants::screen_width / 2) - (multi_player_button_->GetTexture()->width_ / 2), constants::screen_height * 4 / 7);
-	
+
 	return true;
 }
 
