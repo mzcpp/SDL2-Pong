@@ -61,6 +61,8 @@ void Ball::Tick()
 		direction_ray_.start_point.y = rect_.y + (rect_.h / 2);
 		direction_ray_.end_point.x = rect_.x + (rect_.w / 2) + ((constants::screen_width + constants::screen_height) * vx_);
 		direction_ray_.end_point.y = rect_.y + (rect_.h / 2) + ((constants::screen_width + constants::screen_height) * vy_);
+
+		GamePlayState::Instance()->GetEdgeIntersectionPoint();
 	}
 }
 
@@ -100,6 +102,8 @@ void Ball::BounceBall(const Paddle& paddle)
 
 	vx_ *= speed_multiple;
 	vy_ *= speed_multiple;
+	
+	GamePlayState::Instance()->GetEdgeIntersectionPoint();
 }
 
 void Ball::Reset()
@@ -121,6 +125,8 @@ void Ball::Reset()
 	direction_ray_.start_point.y = rect_.y + (rect_.h / 2);
 	direction_ray_.end_point.x = rect_.x + (rect_.w / 2) + ((constants::screen_width + constants::screen_height) * vx_);
 	direction_ray_.end_point.y = rect_.y + (rect_.h / 2) + ((constants::screen_width + constants::screen_height) * vy_);
+
+	GamePlayState::Instance()->GetEdgeIntersectionPoint();
 }
 
 SDL_FPoint Ball::GetRotatedPoint(const SDL_FPoint& point, const SDL_FPoint& pivot, int degrees)

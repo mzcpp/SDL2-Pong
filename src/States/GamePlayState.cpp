@@ -9,9 +9,14 @@
 #include <iostream>
 #include <memory>
 #include <cmath>
+#include <vector>
 #include <array>
+#include <cassert>
+#include <iomanip>
 
 std::unique_ptr<GamePlayState> GamePlayState::game_play_state_ = std::make_unique<GamePlayState>();
+	
+bool pause = false;
 
 GamePlayState::~GamePlayState()
 {
@@ -95,8 +100,7 @@ bool GamePlayState::Enter(Game* game)
 	ball_resetting_ = false;
 	ball_reset_ticks_ = 60;
 
-	intersection_point_.x = std::numeric_limits<float>::max();
-	intersection_point_.y = std::numeric_limits<float>::max();
+	GetEdgeIntersectionPoint();
 
 	return true;
 }
@@ -188,16 +192,21 @@ void GamePlayState::HandleEvents()
 
 		if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
 		{
-			game_->PopState();
+			//game_->PopState();
+			pause = !pause;
 		}
 	}
 }
 
 void GamePlayState::Tick()
 {
+	if (pause)
+	{
+		return;
+	}
+
 	if (game_->game_mode_ == GameMode::SINGLE_PLAYER)
 	{
-		
 		if (ball_reset_ticks_ == 0)
 		{
 			ball_reset_ticks_ = 30;
@@ -231,7 +240,6 @@ void GamePlayState::Tick()
 			player2_score_texture_->LoadFromText(game_->renderer_, font_, std::to_string(player2_score_).c_str(), score_color);
 		}
 
-		const float paddle_mid_point_y = player2_paddle_.rect_.y + (player2_paddle_.rect_.h / 2.0);
 		float speed = 0.0f;
 
 		if (game_->game_difficulty_ == GameDifficulty::EASY)
@@ -247,47 +255,43 @@ void GamePlayState::Tick()
 			speed = 7.0f;
 		}
 
-		const Line top_edge = { 0.0f, 0.0f, static_cast<float>(constants::screen_width), 0.0f };
-		const Line right_edge = { static_cast<float>(constants::screen_width), 0.0f, static_cast<float>(constants::screen_width), static_cast<float>(constants::screen_height) };
-		const Line bottom_edge = { static_cast<float>(constants::screen_width), static_cast<float>(constants::screen_height), 0.0f, static_cast<float>(constants::screen_height) };
-		const Line left_edge = { 0.0f, static_cast<float>(constants::screen_height), 0.0f, 0.0f };
+		// for (std::size_t i = 0; i < edges.size(); ++i)
+		// {
+		// 	intersection_point_ = GetIntersectionPoint(edges[i], ball_.direction_ray_);
 
-		const std::array<Line, 4> edges = { top_edge, right_edge, bottom_edge, left_edge };
+		// 	if (intersection_point_.x != std::numeric_limits<float>::max() && intersection_point_.y != std::numeric_limits<float>::max())
+		// 	{
+		// 		if (game_->game_difficulty_ != GameDifficulty::IMPOSSIBLE)
+		// 		{
+		// 			std::cout << i << '\n';
+		// 			break;
+		// 		}
+		// 		else
+		// 		{
+		// 			// Line reflected_line = ball_.direction_ray_;
 
-		for (std::size_t i = 0; i < edges.size(); ++i)
-		{
-			intersection_point_ = GetIntersectionPoint(edges[i], ball_.direction_ray_);
+		// 			// while (!FloatingPointSame(intersection_point_.x, 0.0f) || !FloatingPointSame(intersection_point_.x, static_cast<float>(constants::screen_width)))
+		// 			// {
+		// 			// 	reflected_line.start_point = intersection_point_;
+		// 			// 	reflected_line.end_point = intersection_point_;
 
-			if (intersection_point_.x != std::numeric_limits<float>::max() && intersection_point_.y != std::numeric_limits<float>::max())
-			{
-				if (game_->game_difficulty_ != GameDifficulty::IMPOSSIBLE)
-				{
-					break;
-				}
-				else
-				{
-					// Line reflected_line = ball_.direction_ray_;
+		// 			// 	SDL_FPoint reflected_vector = { ball_.vx_, -ball_.vy_ };
 
-					// while (!FloatingPointSame(intersection_point_.x, 0.0f) || !FloatingPointSame(intersection_point_.x, static_cast<float>(constants::screen_width)))
-					// {
-					// 	reflected_line.start_point = intersection_point_;
-					// 	reflected_line.end_point = intersection_point_;
+		// 			// 	reflected_line.end_point.x = reflected_line.end_point.x + ((constants::screen_width + constants::screen_height) * reflected_vector.x);
+		// 			// 	reflected_line.end_point.y = reflected_line.end_point.y + ((constants::screen_width + constants::screen_height) * reflected_vector.y);
+		// 			// }
+		// 		}
+		// 	}
+		// }
 
-					// 	SDL_FPoint reflected_vector = { ball_.vx_, -ball_.vy_ };
-
-					// 	reflected_line.end_point.x = reflected_line.end_point.x + ((constants::screen_width + constants::screen_height) * reflected_vector.x);
-					// 	reflected_line.end_point.y = reflected_line.end_point.y + ((constants::screen_width + constants::screen_height) * reflected_vector.y);
-					// }
-				}
-			}
-		}
-
-		// REWORK THIS
+		const float paddle_mid_point_y = player2_paddle_.rect_.y + (player2_paddle_.rect_.h / 2.0);
 		const float dist = intersection_point_.y - paddle_mid_point_y;
 
-		if (std::fabs(dist) > player2_paddle_.rect_.h / 2)
+
+		// fix stutter back and forth
+		if (!FloatingPointSame(paddle_mid_point_y, intersection_point_.y, 0.05f))
 		{
-			if (dist < 0.0)
+			if (dist < 0.0f)
 			{
 				player2_paddle_.vy_ = -speed;
 			}
@@ -326,41 +330,104 @@ void GamePlayState::Render()
 	player1_score_texture_->Render(game_->renderer_, constants::screen_width - score_x_offset, score_y_pos);
 	player2_score_texture_->Render(game_->renderer_, score_x_offset - player2_score_texture_->width_, score_y_pos);
 	
-	SDL_RenderDrawLineF(game_->renderer_, ball_.rect_.x + (ball_.rect_.w / 2), ball_.rect_.y + (ball_.rect_.h / 2), ball_.direction_ray_.end_point.x, ball_.direction_ray_.end_point.y);
+	SDL_RenderDrawLineF(game_->renderer_, ball_.direction_ray_.start_point.x, ball_.direction_ray_.start_point.y, ball_.direction_ray_.end_point.x, ball_.direction_ray_.end_point.y);
 
-						SDL_FPoint intersect_copy = intersection_point_;
-						Line reflected_line = { intersect_copy.x, intersect_copy.y, intersect_copy.x, intersect_copy.y };
+						std::vector<SDL_FPoint> ints;
+						
+						constexpr float epsilon = 0.1f;
+						
+						SDL_FPoint intersect_copy = intersection_point_;						
+						Line reflected_line = ball_.direction_ray_;
+						SDL_FPoint reflected_vector = { intersection_point_.x - reflected_line.start_point.x, intersection_point_.y - reflected_line.start_point.y };
+						int count = 0;
+						ints.push_back(intersect_copy);
 
-						//while (!FloatingPointSame(intersect_copy.x, 0.0f) || !FloatingPointSame(intersect_copy.x, static_cast<float>(constants::screen_width)))
+
+						while (!FloatingPointSame(intersect_copy.x, 0.0f, epsilon) && !FloatingPointSame(intersect_copy.x, static_cast<float>(constants::screen_width), epsilon))
 						{
+							++count;
+							
+
 							reflected_line.start_point = intersect_copy;
 							reflected_line.end_point = intersect_copy;
 
-							SDL_FPoint reflected_vector = { ball_.vx_, -ball_.vy_ };
+							reflected_vector.y = -reflected_vector.y;
 
+							constexpr float multiplier = 0.005f;
+
+							reflected_line.start_point.x = reflected_line.start_point.x + (multiplier * reflected_vector.x);
+							reflected_line.start_point.y = reflected_line.start_point.y + (multiplier * reflected_vector.y);
 							reflected_line.end_point.x = reflected_line.end_point.x + ((constants::screen_width + constants::screen_height) * reflected_vector.x);
 							reflected_line.end_point.y = reflected_line.end_point.y + ((constants::screen_width + constants::screen_height) * reflected_vector.y);
 
 							SDL_RenderDrawLineF(game_->renderer_, reflected_line.start_point.x, reflected_line.start_point.y, reflected_line.end_point.x, reflected_line.end_point.y);
+
+							bool found = false;
 							
+							for (std::size_t i = 0; i < edges.size(); ++i)
+							{
+								SDL_FPoint intersect = GetLinesIntersectionPoint(edges[i], reflected_line);
+								
+								if (intersect.x != std::numeric_limits<float>::max() && intersect.y != std::numeric_limits<float>::max())
+								{
+									intersect_copy = intersect;
+									found = true;
+									ints.push_back(intersect_copy);
+									SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0x00, 0x00, 0xff);
+									constexpr float box_size = 30.0f;
+									SDL_FRect collision_box = { intersect_copy.x - (box_size / 2), intersect_copy.y - (box_size / 2), box_size, box_size };
+									SDL_RenderFillRectF(game_->renderer_, &collision_box);
+									SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0xff, 0xff, 0xff);
+									// std::cout << std::setprecision(10);
+									// std::cout << intersect_copy.x << ' ' << intersect_copy.y << '\n';
+
+									break;
+								}
+							}
+
+							if (count > 10)
+							{
+								std::cout << ints.size() << '\n';
+								
+								for (SDL_FPoint point : ints)
+								{
+									std::cout << point.x << ' ' << point.y << '\n';
+								}
+							 	
+								std::cout << "BREAK\n";
+								break;
+							}
+
+							if (!found)
+							{
+								std::cout << "DID NOT FIND\n";
+								std::cout << reflected_line.start_point.x << ' ' << reflected_line.start_point.y << '\n';
+								std::cout << reflected_line.end_point.x << ' ' << reflected_line.end_point.y << '\n';
+								std::cout << "DID NOT FIND\n";
+								break;
+							}
 						}
-	
 	{
-		constexpr float box_size = 10.0f;
-		const SDL_FRect collision_box = { intersection_point_.x - (box_size / 2), intersection_point_.y - (box_size / 2), box_size, box_size };
 		SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0x00, 0x00, 0xff);
-		SDL_RenderDrawRectF(game_->renderer_, &collision_box);
+
+		constexpr float box_size = 30.0f;
+		SDL_FRect collision_box = { intersection_point_.x - (box_size / 2), intersection_point_.y - (box_size / 2), box_size, box_size };
+		SDL_RenderFillRectF(game_->renderer_, &collision_box);
+		SDL_SetRenderDrawColor(game_->renderer_, 0xff, 0xff, 0xff, 0xff);
+
+		// collision_box = { intersect_copy.x - (box_size / 2), intersect_copy.y - (box_size / 2), box_size, box_size };
+		// SDL_RenderFillRectF(game_->renderer_, &collision_box);
 	}
 	
 	SDL_RenderPresent(game_->renderer_);
 }
 
-const SDL_FPoint GamePlayState::GetIntersectionPoint(const Line& line_1, const Line& line_2) const
+const SDL_FPoint GamePlayState::GetLinesIntersectionPoint(const Line& line_1, const Line& line_2) const
 {
 	SDL_FPoint result_intersection = { std::numeric_limits<float>::max(), std::numeric_limits<float>::max() };
 	
-	const auto line_1_coefficients = LinearEquationCoefficients(line_1.start_point.x, line_1.start_point.y, line_1.end_point.x, line_1.end_point.y);
-    const auto line_2_coefficients = LinearEquationCoefficients(line_2.start_point.x, line_2.start_point.y, line_2.end_point.x, line_2.end_point.y);
+	const auto line_1_coefficients = GetLinearEquationCoefficients(line_1.start_point.x, line_1.start_point.y, line_1.end_point.x, line_1.end_point.y);
+    const auto line_2_coefficients = GetLinearEquationCoefficients(line_2.start_point.x, line_2.start_point.y, line_2.end_point.x, line_2.end_point.y);
 
     const float& A1 = std::get<0>(line_1_coefficients);
     const float& B1 = std::get<1>(line_1_coefficients);
@@ -376,20 +443,9 @@ const SDL_FPoint GamePlayState::GetIntersectionPoint(const Line& line_1, const L
     {
         const float x = (B2 * C1 - B1 * C2) / det;
         const float y = (A1 * C2 - A2 * C1) / det;
+		const SDL_FPoint intersection_point = { x, y };
 
-		const bool x_on_line_1 = (FloatingPointLessThan(std::min(line_1.start_point.x, line_1.end_point.x), x) || FloatingPointSame(std::min(line_1.start_point.x, line_1.end_point.x), x)) && 
-								(FloatingPointLessThan(x, std::max(line_1.start_point.x, line_1.end_point.x)) || FloatingPointSame(x, std::max(line_1.start_point.x, line_1.end_point.x)));
-
-		const bool y_on_line_1 = (FloatingPointLessThan(std::min(line_1.start_point.y, line_1.end_point.y), y) || FloatingPointSame(std::min(line_1.start_point.y, line_1.end_point.y), y)) && 
-								(FloatingPointLessThan(y, std::max(line_1.start_point.y, line_1.end_point.y)) || FloatingPointSame(y, std::max(line_1.start_point.y, line_1.end_point.y)));
-
-		const bool x_on_line_2 = (FloatingPointLessThan(std::min(line_2.start_point.x, line_2.end_point.x), x) || FloatingPointSame(std::min(line_2.start_point.x, line_2.end_point.x), x)) && 
-								(FloatingPointLessThan(x, std::max(line_2.start_point.x, line_2.end_point.x)) || FloatingPointSame(x, std::max(line_2.start_point.x, line_2.end_point.x)));
-
-		const bool y_on_line_2 = (FloatingPointLessThan(std::min(line_2.start_point.y, line_2.end_point.y), y) || FloatingPointSame(std::min(line_2.start_point.y, line_2.end_point.y), y)) && 
-								(FloatingPointLessThan(y, std::max(line_2.start_point.y, line_2.end_point.y)) || FloatingPointSame(y, std::max(line_2.start_point.y, line_2.end_point.y)));					
-
-        if (x_on_line_1 && y_on_line_1 && x_on_line_2 && y_on_line_2)
+        if (IsPointOnLine(intersection_point, line_1) && IsPointOnLine(intersection_point, line_2))
         {
 			result_intersection.x = x;
 			result_intersection.y = y;
@@ -397,4 +453,50 @@ const SDL_FPoint GamePlayState::GetIntersectionPoint(const Line& line_1, const L
     }
 
 	return result_intersection;
+}
+
+void GamePlayState::GetEdgeIntersectionPoint()
+{
+	for (std::size_t i = 0; i < edges.size(); ++i)
+	{
+		intersection_point_ = GetLinesIntersectionPoint(edges[i], ball_.direction_ray_);
+
+		if (intersection_point_.x != std::numeric_limits<float>::max() && intersection_point_.y != std::numeric_limits<float>::max())
+		{
+			if (game_->game_difficulty_ != GameDifficulty::IMPOSSIBLE)
+			{
+				return;
+			}
+			else
+			{
+				constexpr float epsilon = 0.01f;
+				Line reflected_line = { intersection_point_.x, intersection_point_.y, intersection_point_.x, intersection_point_.y };
+				SDL_FPoint intersect_copy = intersection_point_;
+
+				while (!FloatingPointSame(intersect_copy.x, 0.0f, epsilon) && !FloatingPointSame(intersect_copy.x, static_cast<float>(constants::screen_width), epsilon))
+				{
+
+				}
+
+				intersection_point_ = intersect_copy;
+				
+				// while (intersection point on either of the vertical lines)
+					// reflect ray from intersection point
+					// get another intersection point
+			}
+		}
+	}
+}
+
+bool GamePlayState::IsPointOnLine(const SDL_FPoint point, const Line& line) const
+{
+	constexpr float epsilon = 0.01;
+
+	const bool x_on_line = (FloatingPointLessThan(std::min(line.start_point.x, line.end_point.x), point.x, epsilon) || FloatingPointSame(std::min(line.start_point.x, line.end_point.x), point.x, epsilon)) && 
+							(FloatingPointLessThan(point.x, std::max(line.start_point.x, line.end_point.x), epsilon) || FloatingPointSame(point.x, std::max(line.start_point.x, line.end_point.x), epsilon));
+
+	const bool y_on_line = (FloatingPointLessThan(std::min(line.start_point.y, line.end_point.y), point.y, epsilon) || FloatingPointSame(std::min(line.start_point.y, line.end_point.y), point.y, epsilon)) && 
+							(FloatingPointLessThan(point.y, std::max(line.start_point.y, line.end_point.y), epsilon) || FloatingPointSame(point.y, std::max(line.start_point.y, line.end_point.y), epsilon));
+
+	return x_on_line && y_on_line;
 }

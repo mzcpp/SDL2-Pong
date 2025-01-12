@@ -10,7 +10,13 @@ struct Line
 	SDL_FPoint start_point;
 	SDL_FPoint end_point;
 
-    Line() = default;
+    Line()
+    {
+        start_point.x = std::numeric_limits<float>::max();
+        end_point.y = std::numeric_limits<float>::max();
+        start_point.x = std::numeric_limits<float>::max();
+        end_point.y = std::numeric_limits<float>::max();
+    }
 
     Line(float sx, float sy, float ex, float ey)
     {
