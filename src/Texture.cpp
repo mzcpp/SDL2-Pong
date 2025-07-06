@@ -1,8 +1,10 @@
 #include "Texture.hpp"
 
-#include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
-#include <SDL2/SDL_image.h>
+#include <stdio.h>
+
+#include <SDL.h>
+#include <SDL_ttf.h>
+#include <SDL_image.h>
 
 Texture::Texture() : texture_(nullptr), width_(0), height_(0)
 {

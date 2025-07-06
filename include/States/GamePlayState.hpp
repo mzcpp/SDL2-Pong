@@ -10,6 +10,7 @@
 #include <memory>
 #include <cmath>
 #include <array>
+#include <optional>
 
 const Line top_edge = { 0.0f, 0.0f, static_cast<float>(constants::screen_width), 0.0f };
 const Line right_edge = { static_cast<float>(constants::screen_width), 0.0f, static_cast<float>(constants::screen_width), static_cast<float>(constants::screen_height) };
@@ -46,7 +47,7 @@ public:
 	Paddle player1_paddle_;
 	Paddle player2_paddle_;
 	
-	GamePlayState() = default;
+	GamePlayState();
 
 	~GamePlayState() override;
 
@@ -66,7 +67,7 @@ public:
 
 	void Render() override;
 
-	const SDL_FPoint GetLinesIntersectionPoint(const Line& line_1, const Line& line_2) const;
+	const std::optional<SDL_FPoint> GetLinesIntersectionPoint(const Line& line_1, const Line& line_2) const;
 
 	void GetEdgeIntersectionPoint();
 

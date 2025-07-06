@@ -2,7 +2,17 @@
 #include "Constants.hpp"
 #include "Game.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
+
+Paddle::Paddle() :
+	game_(nullptr),
+	vy_(0.0f)
+{
+	rect_.x = 0.0f;
+	rect_.y = 0.0f;
+	rect_.w = 0.0f;
+	rect_.h = 0.0f;
+}
 
 void Paddle::HandleEvent(SDL_Event* e)
 {

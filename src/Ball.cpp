@@ -4,13 +4,24 @@
 #include "Constants.hpp"
 #include "States/GamePlayState.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 #include <iostream>
 #include <cmath>
 #include <algorithm>
 #include <cstdlib>
 #include <ctime>
+
+Ball::Ball() : game_(nullptr)
+{
+	rect_.x = 0.0f;
+	rect_.y = 0.0f;
+	rect_.w = 0.0f;
+	rect_.h = 0.0f;
+
+	vx_ = 0.0f;
+	vy_ = 0.0f;
+}
 
 void Ball::HandleEvent(SDL_Event* e)
 {
@@ -31,7 +42,7 @@ void Ball::Tick()
 
 		if (SDL_IntersectFRect(&rect_, &GamePlayState::Instance()->player1_paddle_.rect_, &intersect))
 		{
-			rect_.x -= intersect.w / 2.0;
+			rect_.x -= intersect.w / 2.0f;
 			rect_.y -= intersect.h / 2.0;
 		}
 
@@ -45,8 +56,8 @@ void Ball::Tick()
 
 		if (SDL_IntersectFRect(&rect_, &GamePlayState::Instance()->player2_paddle_.rect_, &intersect))
 		{
-			rect_.x -= intersect.w / 2.0;
-			rect_.y -= intersect.h / 2.0;
+			rect_.x -= intersect.w / 2.0f;
+			rect_.y -= intersect.h / 2.0f;
 		}
 
 		BounceBall(GamePlayState::Instance()->player2_paddle_);
@@ -61,8 +72,11 @@ void Ball::Tick()
 		direction_ray_.start_point.y = rect_.y + (rect_.h / 2);
 		direction_ray_.end_point.x = rect_.x + (rect_.w / 2) + ((constants::screen_width + constants::screen_height) * vx_);
 		direction_ray_.end_point.y = rect_.y + (rect_.h / 2) + ((constants::screen_width + constants::screen_height) * vy_);
-
-		GamePlayState::Instance()->GetEdgeIntersectionPoint();
+		
+		if (game_->game_difficulty_ != GameDifficulty::IMPOSSIBLE)
+		{
+			GamePlayState::Instance()->GetEdgeIntersectionPoint();
+		}
 	}
 }
 
@@ -74,7 +88,7 @@ void Ball::Render()
 
 void Ball::BounceBall(const Paddle& paddle)
 {
-	const int mid_level = rect_.y + (rect_.w / 2);
+	const int mid_level = rect_.y + (rect_.w / 2.0f);
 	const double collision_point_normalized = std::clamp(static_cast<double>(mid_level - paddle.rect_.y) / static_cast<double>(paddle.rect_.h), 0.0, 1.0);
 
 	constexpr int right_angle = 90;

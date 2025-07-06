@@ -1,7 +1,7 @@
 #ifndef PADDLE_HPP
 #define PADDLE_HPP
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 class Game;
 
@@ -12,7 +12,7 @@ public:
 	SDL_FRect rect_;
 	float vy_;
 
-	Paddle() = default;
+	Paddle();
 
 	void HandleEvent(SDL_Event* e);
 

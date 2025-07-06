@@ -3,7 +3,7 @@
 
 #include "Utility.hpp"
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 class Game;
 class Paddle;
@@ -17,7 +17,7 @@ public:
 	float vx_;
 	float vy_;
 
-	Ball() = default;
+	Ball();
 
 	void HandleEvent(SDL_Event* e);
 

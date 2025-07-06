@@ -7,6 +7,8 @@
 #include <memory>
 #include <vector>
 
+#include <SDL_ttf.h>
+
 class GameDifficultyMenuState : public GameState
 {
 private:
