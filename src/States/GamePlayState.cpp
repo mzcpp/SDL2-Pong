@@ -272,40 +272,9 @@ void GamePlayState::Tick()
 			speed = 7.0f;
 		}
 
-		// for (std::size_t i = 0; i < edges.size(); ++i)
-		// {
-		// 	intersection_point_ = GetIntersectionPoint(edges[i], ball_.direction_ray_);
-
-		// 	if (intersection_point_.x != std::numeric_limits<float>::max() && intersection_point_.y != std::numeric_limits<float>::max())
-		// 	{
-		// 		if (game_->game_difficulty_ != GameDifficulty::IMPOSSIBLE)
-		// 		{
-		// 			std::cout << i << '\n';
-		// 			break;
-		// 		}
-		// 		else
-		// 		{
-		// 			// Line reflected_line = ball_.direction_ray_;
-
-		// 			// while (!FloatingPointSame(intersection_point_.x, 0.0f) || !FloatingPointSame(intersection_point_.x, static_cast<float>(constants::screen_width)))
-		// 			// {
-		// 			// 	reflected_line.start_point = intersection_point_;
-		// 			// 	reflected_line.end_point = intersection_point_;
-
-		// 			// 	SDL_FPoint reflected_vector = { ball_.vx_, -ball_.vy_ };
-
-		// 			// 	reflected_line.end_point.x = reflected_line.end_point.x + ((constants::screen_width + constants::screen_height) * reflected_vector.x);
-		// 			// 	reflected_line.end_point.y = reflected_line.end_point.y + ((constants::screen_width + constants::screen_height) * reflected_vector.y);
-		// 			// }
-		// 		}
-		// 	}
-		// }
-
 		const float paddle_mid_point_y = player2_paddle_.rect_.y + (player2_paddle_.rect_.h / 2.0f);
 		const float dist = intersection_point_.y - paddle_mid_point_y;
 
-
-		// fix stutter back and forth
 		if (!FloatingPointSame(paddle_mid_point_y, intersection_point_.y, 0.05f))
 		{
 			if (dist < 0.0f)
@@ -477,11 +446,9 @@ void GamePlayState::GetEdgeIntersectionPoint()
 	SDL_FPoint intersect_copy = intersection_point_;
 	Line reflected_line = ball_.direction_ray_;
 	SDL_FPoint reflected_vector = { intersection_point_.x - reflected_line.start_point.x, intersection_point_.y - reflected_line.start_point.y };
-	int loops = 0;
 
 	while (!FloatingPointSame(intersect_copy.x, 0.0f, epsilon) && !FloatingPointSame(intersect_copy.x, static_cast<float>(constants::screen_width), epsilon))
 	{
-		++loops;
 		reflected_line.start_point = intersect_copy;
 		reflected_line.end_point = intersect_copy;
 
@@ -515,7 +482,7 @@ void GamePlayState::GetEdgeIntersectionPoint()
 
 		intersect_copy = intersect;
 	}
-	printf("%d\n", loops);
+
 	intersection_point_ = intersect_copy;
 }
 
