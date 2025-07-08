@@ -19,8 +19,6 @@
 
 std::unique_ptr<GamePlayState> GamePlayState::game_play_state_ = std::make_unique<GamePlayState>();
 	
-bool pause = false;
-
 GamePlayState::GamePlayState() : 
 	game_(nullptr), 
 	font_(nullptr), 
@@ -209,19 +207,13 @@ void GamePlayState::HandleEvents()
 
 		if (e.type == SDL_KEYDOWN && e.key.keysym.sym == SDLK_ESCAPE)
 		{
-			//game_->PopState();
-			pause = !pause;
+			game_->PopState();
 		}
 	}
 }
 
 void GamePlayState::Tick()
 {
-	if (pause)
-	{
-		return;
-	}
-
 	if (game_->game_mode_ == GameMode::SINGLE_PLAYER)
 	{
 		if (ball_reset_ticks_ == 0)
